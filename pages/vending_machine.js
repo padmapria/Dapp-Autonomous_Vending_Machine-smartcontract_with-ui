@@ -1,0 +1,322 @@
+import Head from 'next/head'
+import styles from '../styles/Home.module.css'
+import { useState, useEffect } from 'react'
+
+import 'bulma/css/bulma.min.css';
+
+import VendingMachine from "../artifacts/contracts/VendingMachine.sol/VendingMachine.json";
+
+import Web3 from 'web3'
+import * as contract_end_point from '../contract_deployed_endpoint';
+
+export default function vending_machine() {
+
+  const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+  const [web3, setWeb3] = useState(null)
+  const [address, setAddress] = useState(null)
+  const [vmContract, setVmContract] = useState(null)
+
+  //Appln specific
+  const [stock_balance, setStock_balance] = useState('')
+  const [buyCount, setBuyCount] = useState('')
+  const [totalSales, setTotalSales] = useState('')
+  const [restockCount, setRestockCount] = useState('')
+
+  const [buyers, setBuyers] = useState([])
+  const [owner, setOwner] = useState(null)
+
+  const provider = new Web3.providers.HttpProvider("HTTP://127.0.0.1:8545");
+  const web = new Web3(provider);
+  const contract = new web.eth.Contract(VendingMachine.abi, contract_end_point.vending_contract_Addr);
+
+  useEffect(() => {
+    updateState()
+  }, [contract])
+
+  const updateState = () => {
+   // if (contract) getBuyers()
+    if (contract) find_StockBalance()
+    if (contract) getOwner()
+    if (vmContract) getTotalSales()
+  }
+
+  const find_StockBalance = async () => {
+    let balance = await contract.methods.getVendingMachineBalance().call();
+    setStock_balance(balance);
+  }
+
+
+  const getOwner = async () => {
+    const owner = await contract.methods.owner().call();
+    setOwner(owner);
+  }
+
+  const getBuyers = async () => {
+    const buyers = await vmContract.methods.getBuyers().call();
+    setBuyers(buyers);
+  }
+
+
+  const getTotalSales = async () => {
+    const sales_amt = await vmContract.methods.sales_amount().call();
+    setTotalSales(sales_amt);
+  }
+
+  const addToCart = event => {
+    setBuyCount(event.target.value)
+  }
+
+  const addStock = event => {
+    setRestockCount(event.target.value)
+  }
+
+  const restock = async () => {
+    connectToMetamask();
+    if(address == owner){
+      await vmContract.methods.restock(parseInt(restockCount)).send({
+        from: address,
+        gas: 3000000,
+        gasPrice: null
+      })
+      if (vmContract) find_StockBalance()
+      setRestockCount(0)
+    }
+    else{
+      alert("Unautorized only owner is allowed to restock");
+    }
+  }
+
+
+  const closeSales = async () => {
+    connectToMetamask();
+    if(address == owner){
+      await vmContract.methods.close_sales().send({
+        from: address,
+        gas: 3000000,
+        gasPrice: null
+      });
+      const etherValue = Web3.utils.fromWei(totalSales, 'ether');
+      console.log("Total sales in Ether: ",etherValue);
+      alert("Total sales in Ether: ",+etherValue);
+      if (vmContract) find_StockBalance();
+      if (vmContract) getBuyers();
+    }
+    else{
+      alert("Unautorized only owner is allowed to perform");
+    }
+  }
+
+
+  const purchase = async () => {
+    if(buyCount==0){
+      alert("Quantity cannot be null")
+    }
+    else{
+      try {
+        connectToMetamask();
+        await vmContract.methods.purchase(parseInt(buyCount)).send({
+          from: address,
+          value: web3.utils.toWei('3', 'ether') * buyCount,
+          gas: 3000000,
+          gasPrice: null
+        })
+        setSuccessMsg(`${buyCount} items purchased!`)
+        setBuyCount(0)
+
+         if (vmContract) find_StockBalance()
+         if (vmContract) getBuyers();
+        //if (vmContract && address) getMyAccountToQty(address)
+      } catch(err) {
+        setError(err.message)
+      }
+    }
+  }
+
+  const connectToMetamask = async () => {
+    alert("Connecting to metamask")
+    /* To check if metamask is installed */
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+        try {
+          /* request wallet connect */
+          await window.ethereum.request({ method: "eth_requestAccounts" })
+          /* create web3 instance and set to state var */
+          const web3 = new Web3(window.ethereum)
+          /* set web3 instance */
+          setWeb3(web3)
+          /* get list of accounts */
+          const accounts = await web3.eth.getAccounts()
+          /* set Account 1 to React state var */
+          setAddress(accounts[0])
+          console.log("Accounts 0",+accounts[0])
+
+          const vm = new web3.eth.Contract(VendingMachine.abi, contract_end_point.vending_contract_Addr);
+          //vm.methods.getVendingMachineBalance().call().then(console.log);
+          setVmContract(vm);
+        } catch(err) {
+          log.error("Having error");
+          setError(err.message)
+        }
+    } else {
+        // meta mask is not installed use ganache
+        console.log("install MetaMask use ganache instead")
+    }
+  }
+  return (
+  <>
+<div className={styles.container}>
+  <Head>
+    <title>Vending machine app</title>
+    <meta name="description" content="Generated by create next app" />
+  </Head>
+</div>
+<div> 
+
+<div className='has-background-info-dark'> 
+  <div id="navbarBasicExample" className="navbar-menu">
+    <div className="navbar-start">
+    <a className="navbar-item mx-5 is-size-4 has-text-white" >
+        About  
+      </a>
+
+      <a className="navbar-item mx-5 is-size-4 has-text-white" >
+        Purchase 
+      </a>
+
+      <a className="navbar-item is-size-4 has-text-white">
+        Write a Review
+      </a>
+    </div>
+  </div>
+</div>
+
+<div className="container">
+  <section className="mt-5">
+    <div className="columns">
+      
+      <div className="column is-two-thirds">
+      <section className="mt-12 is-size-12" >
+        <div className="card">
+            <div className="card-content">
+              <div className="content">
+                <h3> Store Owner :{owner}</h3>
+                <h3> Stock in hand :{stock_balance}</h3>
+              </div>
+            </div>
+            </div>
+      </section>
+
+      <section className="mt-5">
+          <div className="container">
+            <div className="field">
+            
+            
+            <div className="buttons">
+              <a className="button is-link mx-5 " onClick={connectToMetamask}>
+                <strong>Connect to MetaMask</strong>
+              </a>
+            </div>
+              <div className="control column is-4">
+              <label className="label">Buy 1 item for 3 ether</label>
+                <input onChange={addToCart} className="input is-hovered" type="type" placeholder="Enter quantity..." />
+              </div>
+              <button 
+                onClick={purchase} 
+                className="button is-success mt-2"
+              >Buy</button>
+            </div>
+          </div>
+      </section>
+      <section>
+        <div className="container has-text-danger mt-5">
+          <p>{error}</p>
+        </div>
+      </section>
+      <section>
+        <div className="container has-text-success mt-5">
+          <p>{successMsg}</p>
+        </div>
+      </section>
+      </div>
+
+      <div className="column is-one-third">
+      <section className="mt-5">
+        <div className="card">
+          <div className="card-content">
+            <div className="content">
+              <h2>Today's Buyers ({buyers.length})</h2>
+              <ul className="ml-0">
+                {
+                  (buyers && buyers.length > 0) && buyers.map((buyer, index) => {
+                    return <li key={`${buyer}-${index}`}>
+                      <a href={`https://etherscan.io/address/${buyer}`} target="_blank">
+                        {buyer}
+                      </a>
+                    </li>
+                  })
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-5">
+        <div className="card">
+          <div className="card-content">
+            <div className="content">
+            <p><b>Admin only: </b>ReStock</p>
+            <div className="control column is-4">
+              <input onChange={addStock} className="input is-hovered" type="type" placeholder="Quantity..." />
+            </div>
+        <button onClick={restock} className="button is-warning is-medium mt-2">ReStock</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-5">
+        <div className="card">
+          <div className="card-content">
+            <div className="content">
+            <p><b>Admin only: </b>Close Sales for the day</p>
+              <button onClick={closeSales} className="button is-danger is-medium mt-2">Close Sales</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+
+<footer className="footer">
+  <div className="content has-text-centered">
+    <p>
+      <strong>Bulma</strong> by <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is licensed
+      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+      is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+    </p>
+  </div>
+
+  <div className="navbar-brand">
+  <a className="navbar-item" href="https://www.google.com">
+    <img src="http://www.google.com/logos/doodles/2020/stay-and-play-at-home-with-popular-past-google-doodles-coding-2017-6753651837108765-2xa.gif" width="112" height="28" />
+  </a>
+
+  <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+  </a>
+</div>
+</footer>
+
+
+</div>
+
+
+  </>
+)}
