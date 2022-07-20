@@ -1,4 +1,4 @@
 
-  export const vending_contract_Addr = "0x3540DC8E346Fe7d5C490BEa675eD6384D8683832"
-  export const vending_owner_Addr = "0xee1AC8A80E3591912A1864622Af33D627d4A75B4"
+  export const vending_contract_Addr = "0xa9e49258aD10adc2117460fEb6C31DA8ccb45f58"
+  export const vending_owner_Addr = "0x2DcA609aBcabe819F953f158Ad3b5C1cf015B09A"
   

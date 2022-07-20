@@ -1,13 +1,14 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { useState, useEffect } from 'react'
-
+import background from '../img/eth.jpg';
 import 'bulma/css/bulma.min.css';
 
 import VendingMachine from "../artifacts/contracts/VendingMachine.sol/VendingMachine.json";
 
 import Web3 from 'web3'
 import * as contract_end_point from '../contract_deployed_endpoint';
+import {vm_contract} from './vending.js';
 
 export default function vending_machine() {
 
@@ -26,29 +27,25 @@ export default function vending_machine() {
   const [buyers, setBuyers] = useState([])
   const [owner, setOwner] = useState(null)
 
-  const provider = new Web3.providers.HttpProvider("HTTP://127.0.0.1:8545");
-  const web = new Web3(provider);
-  const contract = new web.eth.Contract(VendingMachine.abi, contract_end_point.vending_contract_Addr);
-
   useEffect(() => {
     updateState()
-  }, [contract])
+  }, [vm_contract])
 
   const updateState = () => {
    // if (contract) getBuyers()
-    if (contract) find_StockBalance()
-    if (contract) getOwner()
+    if (vm_contract) find_StockBalance()
+    if (vm_contract) getOwner()
     if (vmContract) getTotalSales()
   }
 
   const find_StockBalance = async () => {
-    let balance = await contract.methods.getVendingMachineBalance().call();
+    let balance = await vm_contract.methods.getVendingMachineBalance().call();
     setStock_balance(balance);
   }
 
 
   const getOwner = async () => {
-    const owner = await contract.methods.owner().call();
+    const owner = await vm_contract.methods.owner().call();
     setOwner(owner);
   }
 
@@ -154,7 +151,6 @@ export default function vending_machine() {
           //vm.methods.getVendingMachineBalance().call().then(console.log);
           setVmContract(vm);
         } catch(err) {
-          log.error("Having error");
           setError(err.message)
         }
     } else {
@@ -173,7 +169,7 @@ export default function vending_machine() {
 <div> 
 
 <div className='has-background-info-dark'> 
-  <div id="navbarBasicExample" className="navbar-menu">
+  <div id="navbarBasicExample" className="navbar-menu mb-2">
     <div className="navbar-start">
     <a className="navbar-item mx-5 is-size-4 has-text-white" >
         About  
@@ -190,42 +186,40 @@ export default function vending_machine() {
   </div>
 </div>
 
-<div className="container">
-  <section className="mt-5">
+<div style={{ 
+      backgroundImage: `url("https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80")`}}>
+  <section>
     <div className="columns">
       
-      <div className="column is-two-thirds">
-      <section className="mt-12 is-size-12" >
-        <div className="card">
-            <div className="card-content">
-              <div className="content">
-                <h3> Store Owner :{owner}</h3>
-                <h3> Stock in hand :{stock_balance}</h3>
-              </div>
-            </div>
-            </div>
+      <div className="column is-half mx-6 mt-5" >
+      <section className="mt-12 is-size-17 has-text-white" >
+
+                <h2> Store Owner :{owner}</h2>
+                <h2> Stock in hand :{stock_balance}</h2>
+          
       </section>
 
       <section className="mt-5">
-          <div className="container">
+          <div className="container has-text-centered">
             <div className="field">
-            
-            
             <div className="buttons">
               <a className="button is-link mx-5 " onClick={connectToMetamask}>
                 <strong>Connect to MetaMask</strong>
               </a>
             </div>
               <div className="control column is-4">
-              <label className="label">Buy 1 item for 3 ether</label>
+              <label className="label has-text-white">Buy 1 item for 3 ether</label>
                 <input onChange={addToCart} className="input is-hovered" type="type" placeholder="Enter quantity..." />
               </div>
-              <button 
-                onClick={purchase} 
-                className="button is-success mt-2"
-              >Buy</button>
             </div>
           </div>
+          <div>
+          <button 
+                onClick={purchase} 
+                className="button is-white mx-5"
+              >Buy</button>
+          </div>
+
       </section>
       <section>
         <div className="container has-text-danger mt-5">
@@ -238,13 +232,15 @@ export default function vending_machine() {
         </div>
       </section>
       </div>
-
-      <div className="column is-one-third">
+      
+      
+      <div className="column is-half margin-right: 5px;">
+      <div>
       <section className="mt-5">
-        <div className="card">
+        <div className="card has-background-warning-light column is-two-thirds is-offset-three-quarter"  >
           <div className="card-content">
             <div className="content">
-              <h2>Today's Buyers ({buyers.length})</h2>
+              <h5>Today's Buyers ({buyers.length})</h5>
               <ul className="ml-0">
                 {
                   (buyers && buyers.length > 0) && buyers.map((buyer, index) => {
@@ -262,21 +258,21 @@ export default function vending_machine() {
       </section>
 
       <section className="mt-5">
-        <div className="card">
+        <div className="card has-background-link-light column is-two-thirds is-offset-three-quarter">
           <div className="card-content">
             <div className="content">
-            <p><b>Admin only: </b>ReStock</p>
-            <div className="control column is-4">
-              <input onChange={addStock} className="input is-hovered" type="type" placeholder="Quantity..." />
+            <b>Admin only: </b>ReStock
+            <div className="field is-grouped is-grouped-centered column is-9">
+              <input onChange={addStock} className="input is-hovered mx-4 mt-3" type="type" placeholder="Quantity..." />
+              <button onClick={restock} className="button is-warning is-medium mt-2">ReStock</button>
             </div>
-        <button onClick={restock} className="button is-warning is-medium mt-2">ReStock</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-5">
-        <div className="card">
+      <section className="mt-5 mb-7">
+        <div className="card has-background-warning-light column is-two-thirds is-offset-three-quarter">
           <div className="card-content">
             <div className="content">
             <p><b>Admin only: </b>Close Sales for the day</p>
@@ -286,35 +282,34 @@ export default function vending_machine() {
         </div>
       </section>
       </div>
+      </div>
 
     </div>
   </section>
 </div>
 
 
-<footer className="footer">
-  <div className="content has-text-centered">
-    <p>
-      <strong>Bulma</strong> by <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is licensed
-      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
-      is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
-    </p>
+  <footer className="footer">
+    <div className="content has-text-centered">
+      <p>
+        <strong>Bulma</strong> by <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is licensed
+        <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+        is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+      </p>
+    </div>
+
+    <div className="navbar-brand">
+    <a className="navbar-item" href="https://www.google.com">
+      <img src="http://www.google.com/logos/doodles/2020/stay-and-play-at-home-with-popular-past-google-doodles-coding-2017-6753651837108765-2xa.gif" width="112" height="28" />
+    </a>
+
+    <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
   </div>
-
-  <div className="navbar-brand">
-  <a className="navbar-item" href="https://www.google.com">
-    <img src="http://www.google.com/logos/doodles/2020/stay-and-play-at-home-with-popular-past-google-doodles-coding-2017-6753651837108765-2xa.gif" width="112" height="28" />
-  </a>
-
-  <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-    <span aria-hidden="true"></span>
-    <span aria-hidden="true"></span>
-    <span aria-hidden="true"></span>
-  </a>
-</div>
-</footer>
-
-
+  </footer>
 </div>
 
 
