@@ -24,6 +24,7 @@ contract VendingMachine {
 
         //For gas optimization
         //https://dev.to/javier123454321/solidity-gas-optimization-pt1-4271
+        //https://mudit.blog/solidity-gas-optimization-tips/
         address sender = msg.sender;
         
         //Create an entry to map the purchaser address and quantity purchased

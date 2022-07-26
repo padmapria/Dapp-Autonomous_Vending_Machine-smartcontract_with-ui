@@ -3,6 +3,7 @@ require("dotenv").config()
 
 /** @type import('hardhat/config').HardhatUserConfig */
 
+//patrick https://www.youtube.com/watch?v=gyMwXuJrbJQ
 const DEFAULT_NETWORK = process.env.DEFAULT_NETWORK
 const KOVAN_RPC_URL =
     process.env.KOVAN_RPC_URL ||

@@ -7,6 +7,7 @@
 const hre = require("hardhat");
 const fs = require('fs');
 
+//https://medium.com/coinmonks/react-project-setup-using-hardhat-truffle-part-1-20a596865e
 async function main() {
   const VendingMachine = await hre.ethers.getContractFactory("VendingMachine");
   const vendingMachine = await VendingMachine.deploy();

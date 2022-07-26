@@ -127,6 +127,7 @@ export default function vending_machine() {
     }
   }
 
+  //https://www.youtube.com/watch?v=Qu6GloG0dQk&t=5902s
   const connectToMetamask = async () => {
     alert("Connecting to metamask")
     /* To check if metamask is installed */
