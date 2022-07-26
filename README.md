@@ -13,6 +13,9 @@ npx hardhat run scripts/deploy.js
 ```
 
 References used :<br />
+About blockchain<br />
+University of buffalo coursera Blockchain specialization<br />
+
 For smart contract gas optimization <br />
 https://dev.to/javier123454321/solidity-gas-optimization-pt1-4271<br />
 https://mudit.blog/solidity-gas-optimization-tips/<br />
@@ -20,10 +23,10 @@ https://mudit.blog/solidity-gas-optimization-tips/<br />
 For deploying the smart contract in hardhat/ganache <br />
 https://medium.com/coinmonks/react-project-setup-using-hardhat-truffle-part-1-20a596865e<br />
 
-For infura /How to write smart contract/restricting users to call functions and overall about blockchain <br/>
+For infura /restricting users to call functions in smart contract <br/>
 https://www.youtube.com/watch?v=gyMwXuJrbJQ <br />
 
-For ui connect to metamask<br />
+For ui connect to metamask / bulma<br />
 https://www.youtube.com/watch?v=Qu6GloG0dQk&t=5902s<br />
 
 Other resources
