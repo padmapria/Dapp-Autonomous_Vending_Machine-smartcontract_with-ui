@@ -19,12 +19,16 @@ contract VendingMachine {
     // Purchase coffee from the vending machine
     function purchase(uint quantity) public payable {
 
-        require(msg.value >= quantity * 3 ether, "You must pay at least 3 ether per item");
-        require(goldBars >= quantity, "Not enough items in stock to complete this purchase");
+        require(msg.value >= quantity * 3 ether, "Cost is an item is 3 ether");
+        require(goldBars >= quantity, "Not enough stock");
 
+        //For gas optimization
+        //https://dev.to/javier123454321/solidity-gas-optimization-pt1-4271
+        address sender = msg.sender;
+        
         //Create an entry to map the purchaser address and quantity purchased
-        addressToQuantity[msg.sender] += quantity;  
-        buyers.push(msg.sender);
+        addressToQuantity[sender] += quantity;  
+        buyers.push(sender);
         
         // Reduce the item from total stock
         goldBars-=quantity;
@@ -43,7 +47,7 @@ contract VendingMachine {
     modifier onlyOwner() {
             require(msg.sender == owner);
             _;
-        }
+    }
 
     // Let the owner restock the vending machine
     function restock(uint quantity) public onlyOwner{
@@ -57,11 +61,14 @@ contract VendingMachine {
 
     //Closing the sales for the day
     function close_sales()  public payable onlyOwner{
-         payable(msg.sender).transfer(address(this).balance);
+         payable(owner).transfer(address(this).balance);
 
+        //To save gas cost
+        address[] memory buyerMaping = buyers;
+        
         //iterate through all the mappings and make them 0 as the sales amount is credited to the seller
-        for (uint256 i=0; i < buyers.length; i++){
-            address buyer = buyers[i];
+        for (uint256 i=0; i < buyerMaping.length; i++){
+            address buyer = buyerMaping[i];
             addressToQuantity[buyer] = 0;
         }
          // Reset the buyers list 
