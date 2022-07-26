@@ -18,10 +18,16 @@ contract VendingMachine {
 
     // Purchase coffee from the vending machine
     function purchase(uint quantity) public payable {
+        
+		//https://blog.polymath.network/solidity-tips-and-tricks-to-save-gas-and-reduce-bytecode-size-c44580b218e6
+		// safemath already in 0.8 https://ethereum.stackexchange.com/questions/91367/is-the-safemath-library-obsolete-in-solidity-0-8-0
+		//require(goldBars > quantity, "Stock is less");
+        require(msg.value >= quantity * 3 ether, "1 item is 3 ether");
 
-        require(msg.value >= quantity * 3 ether, "Cost is an item is 3 ether");
-        require(goldBars >= quantity, "Not enough stock");
 
+		// Reduce the item from total stock
+        goldBars-=quantity;
+		
         //For gas optimization
         //https://dev.to/javier123454321/solidity-gas-optimization-pt1-4271
         //https://mudit.blog/solidity-gas-optimization-tips/
@@ -29,10 +35,7 @@ contract VendingMachine {
         
         //Create an entry to map the purchaser address and quantity purchased
         addressToQuantity[sender] += quantity;  
-        buyers.push(sender);
-        
-        // Reduce the item from total stock
-        goldBars-=quantity;
+        buyers.push(sender); 
     }
 
      function getBuyers() public view returns (address [] memory) {
@@ -61,7 +64,7 @@ contract VendingMachine {
     }
 
     //Closing the sales for the day
-    function close_sales()  public payable onlyOwner{
+    function close_sales() public payable onlyOwner{
          payable(owner).transfer(address(this).balance);
 
         //To save gas cost
