@@ -20,7 +20,7 @@ https://mudit.blog/solidity-gas-optimization-tips/<br />
 For deploying the smart contract in hardhat/ganache <br />
 https://medium.com/coinmonks/react-project-setup-using-hardhat-truffle-part-1-20a596865e<br />
 
-For infura<br/>
+For infura /How to write smart contract/restricting users to call functions and overall about blockchain <br/>
 https://www.youtube.com/watch?v=gyMwXuJrbJQ <br />
 
 For ui connect to metamask<br />
