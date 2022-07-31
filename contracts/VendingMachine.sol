@@ -3,10 +3,14 @@ pragma solidity ^0.8.9;
 
 contract VendingMachine {
 
-    // state variables
-    address public owner;
-    mapping (address => uint) public addressToQuantity;
-    uint goldBars;
+    // immutable or const saves gas cost
+    address public immutable owner;
+    
+	//Mapping is storage expensive and we wont be using the mapping again so commenting out this
+	// https://www.youtube.com/watch?v=zgukojxyHKc
+	//mapping (address => uint) public addressToQuantity;
+    
+	uint goldBars;
     address[] public buyers;
 
     // set the owner as th address that deployed the contract
@@ -21,7 +25,7 @@ contract VendingMachine {
         
 		//https://blog.polymath.network/solidity-tips-and-tricks-to-save-gas-and-reduce-bytecode-size-c44580b218e6
 		// safemath already in 0.8 https://ethereum.stackexchange.com/questions/91367/is-the-safemath-library-obsolete-in-solidity-0-8-0
-		//require(goldBars > quantity, "Stock is less");
+		//require(goldBars > quantity, "No stock");
         require(msg.value >= quantity * 3 ether, "1 item is 3 ether");
 
 
@@ -32,9 +36,6 @@ contract VendingMachine {
         //https://dev.to/javier123454321/solidity-gas-optimization-pt1-4271
         //https://mudit.blog/solidity-gas-optimization-tips/
         address sender = msg.sender;
-        
-        //Create an entry to map the purchaser address and quantity purchased
-        addressToQuantity[sender] += quantity;  
         buyers.push(sender); 
     }
 
@@ -67,14 +68,6 @@ contract VendingMachine {
     function close_sales() public payable onlyOwner{
          payable(owner).transfer(address(this).balance);
 
-        //To save gas cost
-        address[] memory buyerMaping = buyers;
-        
-        //iterate through all the mappings and make them 0 as the sales amount is credited to the seller
-        for (uint256 i=0; i < buyerMaping.length; i++){
-            address buyer = buyerMaping[i];
-            addressToQuantity[buyer] = 0;
-        }
          // Reset the buyers list 
          buyers = new address[](0);
 
