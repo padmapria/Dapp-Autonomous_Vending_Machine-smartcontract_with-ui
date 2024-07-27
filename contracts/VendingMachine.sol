@@ -66,7 +66,7 @@ contract VendingMachine {
     }
 
     // https://ethereum.stackexchange.com/questions/21448/how-to-get-a-contracts-balance-in-solidity
-    function sales_amount() public view onlyOwner returns (uint256){
+    function sales_amount() public view onlyOwner returns (uint128){
         return payable(address(this)).balance;
     }
 
