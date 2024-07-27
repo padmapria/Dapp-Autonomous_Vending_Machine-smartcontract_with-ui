@@ -10,8 +10,11 @@ contract VendingMachine {
 	// https://www.youtube.com/watch?v=zgukojxyHKc
 	//mapping (address => uint) public addressToQuantity;
     
-	uint goldBars;
+	uint16 goldBars;
     address[] public buyers;
+
+   // Event to log purchases
+    event Purchase(address indexed buyer, uint16 quantity);
 
     // set the owner as th address that deployed the contract
     // set the initial vending machine balance to 1000
@@ -21,7 +24,7 @@ contract VendingMachine {
     }
 
     // Purchase coffee from the vending machine
-    function purchase(uint quantity) public payable {
+    function purchase(uint16 quantity) public payable {
         
 		//https://blog.polymath.network/solidity-tips-and-tricks-to-save-gas-and-reduce-bytecode-size-c44580b218e6
 		// safemath already in 0.8 https://ethereum.stackexchange.com/questions/91367/is-the-safemath-library-obsolete-in-solidity-0-8-0
@@ -37,6 +40,9 @@ contract VendingMachine {
         //https://mudit.blog/solidity-gas-optimization-tips/
         address sender = msg.sender;
         buyers.push(sender); 
+
+	// Emit purchase event
+        emit Purchase(msg.sender, quantity);
     }
 
      function getBuyers() public view returns (address [] memory) {
@@ -44,7 +50,7 @@ contract VendingMachine {
     }
 
 
-    function getVendingMachineBalance() public view returns (uint) {
+    function getVendingMachineBalance() public view returns (uint16) {
         return goldBars;
     }
 
@@ -55,7 +61,7 @@ contract VendingMachine {
     }
 
     // Let the owner restock the vending machine
-    function restock(uint quantity) public onlyOwner{
+    function restock(uint16 quantity) public onlyOwner{
         goldBars += quantity;
     }
 
